@@ -108,6 +108,7 @@ BASE_R = 0.10  # 预设 irr10 对应的折现率
 RF = {
     "CNY": 0.0170,  # 中国 10 年期国债，2026-08-07
     "USD": 0.0470,  # 美国 10 年期国债，2026-08-14
+    "JPY": 0.0300,  # 日本 10 年期国债，2026-09-01（1996 年以来首次触及 3%）
 }
 
 LABELS = ("悲观", "基准", "乐观")
@@ -128,6 +129,10 @@ CURRENCY_BANDS = {
                 note="美国10年期国债 4.70% + 中国总ERP 5.18%（含1.01%国别溢价）"),
     "HKD": dict(r=(0.09, 0.115), g_max=0.040, rf=0.0470,
                 note="港币与美元挂钩，口径同 USD"),
+    # 日元：下沿 = 观测 Rf 3.00% + 约 4.3pct，上沿 = Rf + 约 6.5pct（日本主权评级 A+，国别溢价小）。
+    # g 上限 = 日银 2% 通胀目标 + 约 0.5pct 潜在实际增速（人口负增长，内阁府估计潜在增速 0.5% 上下）。
+    "JPY": dict(r=(0.07, 0.095), g_max=0.025, rf=0.0300,
+                note="日本10年期国债 3.00%（2026-09-01）+ ERP 约 4.3-6.5pct"),
 }
 
 # 离散风险的合法归属。写进折现率或 beta 一律打回——抬 r 三个百分点对第 10 年现金流的
@@ -562,7 +567,7 @@ def main():
     p.set_defaults(func=cmd_check)
 
     p = sub.add_parser("audit", help="三条硬约束准出检查（【准出】/【打回】）")
-    p.add_argument("--currency", required=True, help="现金流币种：CNY / USD / HKD")
+    p.add_argument("--currency", required=True, help="现金流币种：CNY / USD / HKD / JPY")
     p.add_argument("--r", type=float, required=True, help="资本成本，小数")
     p.add_argument("--roic", type=float, required=True, help="2036 稳态增量 ROIC，小数")
     p.add_argument("--g", required=True, help="三档永续增速，逗号分隔，如 0.005,0.02,0.03")
